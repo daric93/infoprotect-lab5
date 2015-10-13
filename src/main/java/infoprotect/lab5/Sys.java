@@ -1,5 +1,6 @@
 package infoprotect.lab5;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
@@ -11,7 +12,26 @@ public class Sys {
     List<String> list = new ArrayList<>();
     static Scanner sc = new Scanner(System.in);
 
-    public static void menuUser() throws IOException {
+    public void createUser() throws IOException {
+
+        System.out.println("Enter name: ");
+        User user = userMap.get(sc.nextLine());
+        if (Objects.equals(user.password, "empty")) {
+            user.changePassword();
+        } else {
+            System.out.println("Enter password: ");
+            if (Objects.equals(user.password, sc.nextLine())) {
+                if (Objects.equals(user.name, "admin"))
+                    menuAdmin(user);
+                else menuUser(user);
+            } else {
+                System.out.println("Wrong password");
+                createUser();
+            }
+        }
+    }
+
+    public void menuUser(User user) throws IOException {
         int choice;
 
         do {
@@ -19,8 +39,11 @@ public class Sys {
             choice = sc.nextInt();
             switch (choice) {
                 case 0:
+                    user.changePassword();
                     break;
                 case 1:
+                    user.exit();
+                    createUser();
                     break;
                 default:
                     System.out.println("No such option");
@@ -29,19 +52,35 @@ public class Sys {
         } while (choice != 1);
     }
 
-    public static void menuAdmin() throws IOException {
+    public void menuAdmin(User user) throws IOException {
         int choice;
         do {
-            System.out.println("Change password - 0, show list of users - 1, block user - 2, exit - 3");
+            System.out.println("Change password - 0, show list of users - 1, block user - 2, unblock user - 3, exit - 4");
             choice = sc.nextInt();
             switch (choice) {
                 case 0:
+                    System.out.println("Enter password: ");
+                    String password = sc.nextLine();
+                    System.out.println("Repeat password: ");
+                    if (Objects.equals(password, sc.nextLine()))
+                        user.changePassword();
                     break;
                 case 1:
+                    user.showListOfUsers(userMap);
                     break;
                 case 2:
+                    System.out.println("Enter name of user: ");
+                    String key = sc.nextLine();
+                    user.addBlock(userMap.get(key));
                     break;
                 case 3:
+                    System.out.println("Enter name of user: ");
+                    String key2 = sc.nextLine();
+                    user.addBlock(userMap.get(key2));
+                    break;
+                case 4:
+                    user.exit();
+                    createUser();
                     break;
                 default:
                     System.out.println("Change password - 0, show list of users - 1, block user - 2, exit - 3");
@@ -51,6 +90,17 @@ public class Sys {
     }
 
     public static void main(String[] args) throws IOException {
+        Sys sys = new Sys();
 
+        Scanner scanner = new Scanner(new File("users"));
+        while (scanner.hasNextLine()) {
+            String[] split = scanner.nextLine().split("\t");
+            //Arrays.stream(split).forEach(str -> System.out.println(str));
+
+            sys.userMap.put(split[0], new User(split[0], split[1]));
+        }
+        sys.userMap.forEach((k, v) -> System.out.println(k + " " + v.name + " " + v.password + " " + v.blocked));
+
+        sys.createUser();
     }
 }
