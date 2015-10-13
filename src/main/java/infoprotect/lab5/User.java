@@ -1,5 +1,6 @@
 package infoprotect.lab5;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Scanner;
@@ -11,7 +12,7 @@ public class User {
     String name;
     String password;
     Map<String, String> questions;
-    Boolean blocked;
+    Boolean blocked = false;
 
     public User() {
 
@@ -22,12 +23,8 @@ public class User {
         this.password = password;
     }
 
-    public void changePassword() {
-        System.out.println("Enter password: ");
-        Scanner sc = new Scanner(System.in);
-        String password = sc.nextLine();
-        System.out.println("Repeat password: ");
-        if (Objects.equals(password, sc.nextLine()))
+    public void changePassword(String password) {
+
             this.password = password;
     }
 
@@ -36,7 +33,7 @@ public class User {
     }
 
     public void showListOfUsers(Map<String, User> userMap) {
-        userMap.forEach((s, user) -> System.out.println(s));
+        userMap.forEach((s, user) -> System.out.println(s+" "+user.blocked));
     }
 
     public void addBlock(User user) {
@@ -45,6 +42,10 @@ public class User {
 
     public void removeBlock(User user) {
         user.blocked = false;
+    }
+
+    public void addQuestions(String question, String answer){
+        questions.put(question,answer);
     }
 
 }
