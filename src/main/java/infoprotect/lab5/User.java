@@ -1,22 +1,17 @@
 package infoprotect.lab5;
 
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Scanner;
 
 /**
  * Created by darya on 11.10.15.
  */
 public class User {
-    String name;
-    String password;
-    Map<String, String> questions;
-    Boolean blocked = false;
-
-    public User() {
-
-    }
+    private String name;
+    private String password;
+    private Map<String, String> questions = new HashMap<>();
+    private boolean blocked = false;
 
     public User(String name, String password) {
         this.name = name;
@@ -24,8 +19,7 @@ public class User {
     }
 
     public void changePassword(String password) {
-
-            this.password = password;
+        this.password = password;
     }
 
     public void exit() {
@@ -33,19 +27,30 @@ public class User {
     }
 
     public void showListOfUsers(Map<String, User> userMap) {
-        userMap.forEach((s, user) -> System.out.println(s+" "+user.blocked));
+        userMap.forEach((s, user) -> System.out.println(s + " " + user.blocked));
     }
 
-    public void addBlock(User user) {
-        user.blocked = true;
+    public void setBlocked(boolean blocked) {
+        this.blocked = blocked;
     }
 
-    public void removeBlock(User user) {
-        user.blocked = false;
+    public Boolean isBlocked() {
+        return blocked;
     }
 
-    public void addQuestions(String question, String answer){
-        questions.put(question,answer);
+    public void addQuestions(String question, String answer) {
+        questions.put(question, answer);
     }
 
+    public String getPassword() {
+        return password;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    boolean checkQuestion(String question, String answer) {
+        return Objects.equals(questions.get(question), answer);
+    }
 }

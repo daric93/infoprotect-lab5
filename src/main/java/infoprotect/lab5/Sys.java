@@ -1,6 +1,7 @@
 package infoprotect.lab5;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
 
@@ -8,32 +9,34 @@ import java.util.*;
  * Created by darya on 11.10.15.
  */
 public class Sys {
-    Map<String, User> userMap = new HashMap<>();
-    List<String> list = new ArrayList<>();
-    static Scanner sc = new Scanner(System.in);
+    private final Map<String, User> userMap = new HashMap<>();
+    private final List<String> questions = new ArrayList<>();
+    private static Scanner sc = new Scanner(System.in);
+
+    public void readUsers() throws FileNotFoundException {
+        try (Scanner scanner = new Scanner(new File("users"))) {
+            while (scanner.hasNextLine()) {
+                String[] split = scanner.nextLine().split("\t");
+                userMap.put(split[0], new User(split[0], split[1]));
+            }
+        }
+    }
+
+    public void readQuestions() throws FileNotFoundException {
+        try (Scanner scanner = new Scanner(new File("questions"))) {
+            while (scanner.hasNextLine()) {
+                questions.add(scanner.nextLine());
+            }
+        }
+    }
 
     public void fillQuestions(User user) {
-        list.forEach(System.out::println);
-        user.questions = new HashMap<>();
-        list.forEach(elem -> {
+        questions.forEach(elem -> {
             System.out.println(elem);
             user.addQuestions(elem, sc.nextLine());
         });
     }
 
-    public Boolean checkQuestion(User user) {
-        int index = (int) (Math.random() * (list.size()));
-        System.out.println(list.get(index));
-        if(Objects.equals(user.questions.get(list.get(index)), sc.nextLine()))
-            return true;
-        else{
-            System.out.println("Wrong answer for a question");
-            return false;
-        }
-    }
-    public Boolean isBlocked(User user){
-        return user.blocked;
-    }
 
     public void createUser() throws IOException {
 
@@ -42,11 +45,11 @@ public class Sys {
         try {
             user = userMap.get(sc.nextLine());
 
-            if(isBlocked(user)){
+            if (user.isBlocked()) {
                 System.out.println("User is blocked");
                 createUser();
             }
-            if (Objects.equals(user.password, "empty")) {
+            if (Objects.equals(user.getPassword(), "empty")) {
                 System.out.println("Enter new password: ");
                 Scanner sc = new Scanner(System.in);
                 String password = sc.nextLine();
@@ -54,17 +57,22 @@ public class Sys {
                 if (Objects.equals(password, sc.nextLine())) {
                     user.changePassword(password);
                     fillQuestions(user);
-                    if (Objects.equals(user.name, "admin"))
+                    if (Objects.equals(user.getName(), "admin"))
                         menuAdmin(user);
                     else menuUser(user);
                 } else System.out.println("Wrong password");
             } else {
                 System.out.println("Enter password: ");
-                if (Objects.equals(user.password, sc.nextLine())) {
-                    checkQuestion(user);
-                    if (Objects.equals(user.name, "admin"))
-                        menuAdmin(user);
-                    else menuUser(user);
+                if (Objects.equals(user.getPassword(), sc.nextLine())) {
+                    int index = (int) (Math.random() * (questions.size()));
+                    System.out.println(questions.get(index));
+                    if (!user.checkQuestion(questions.get(index), sc.nextLine()))
+                        System.out.println("Wrong answer for a question");
+                    else {
+                        if (Objects.equals(user.getName(), "admin"))
+                            menuAdmin(user);
+                        else menuUser(user);
+                    }
                 } else {
                     System.out.println("Wrong password");
                     createUser();
@@ -104,7 +112,7 @@ public class Sys {
     public void menuAdmin(User user) throws IOException {
         String choice;
         do {
-            System.out.println("Change password - 0, show list of users - 1, block user - 2, unblock user - 3, exit - 4");
+            System.out.println("Change password - 0, show list of users - 1, block user - 2, exit - 3");
             choice = sc.nextLine();
             switch (choice) {
                 case "0":
@@ -121,50 +129,31 @@ public class Sys {
                 case "2":
                     System.out.println("Enter name of user: ");
                     String key = sc.nextLine();
+                    System.out.println("Set block (enter true/false): ");
+                    boolean val = sc.nextBoolean();
                     try {
-                        user.addBlock(userMap.get(key));
+                        userMap.get(key).setBlocked(val);
                     } catch (NullPointerException e) {
                         System.out.println(e.getMessage() + "No user with such name");
                     }
                     break;
                 case "3":
-                    System.out.println("Enter name of user: ");
-                    String key2 = sc.nextLine();
-                    try {
-                        user.addBlock(userMap.get(key2));
-                    } catch (NullPointerException e) {
-                        System.out.println(e.getMessage() + "No user with such name");
-                    }
-                    break;
-                case "4":
                     user.exit();
                     break;
                 default:
                     System.out.println("Change password - 0, show list of users - 1, block user - 2, exit - 3");
                     break;
             }
-        } while (!Objects.equals(choice, "4"));
+        } while (!Objects.equals(choice, "3"));
     }
 
     public static void main(String[] args) throws IOException {
         Sys sys = new Sys();
-
-        Scanner scanner = new Scanner(new File("users"));
-        while (scanner.hasNextLine()) {
-            String[] split = scanner.nextLine().split("\t");
-            sys.userMap.put(split[0], new User(split[0], split[1]));
-        }
-        //sys.userMap.forEach((k, v) -> System.out.println(k + " " + v.name + " " + v.password + " " + v.blocked));
-
-        scanner = new Scanner(new File("questions"));
-        while (scanner.hasNextLine()) {
-            sys.list.add(scanner.nextLine());
-        }
-
+        sys.readUsers();
+        sys.readQuestions();
 
         do {
             sys.createUser();
-            sc.nextLine();
         } while (!Objects.equals(sc.nextLine(), "q"));
     }
 }
