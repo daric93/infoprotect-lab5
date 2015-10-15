@@ -1,8 +1,8 @@
 package infoprotect.lab5;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import javax.json.*;
+import javax.json.stream.JsonGenerator;
+import java.io.*;
 import java.util.*;
 
 /**
@@ -12,6 +12,56 @@ public class Sys {
     public final Map<String, User> userMap = new HashMap<>();
     private final List<String> questions = new ArrayList<>();
     private static Scanner sc = new Scanner(System.in);
+
+    public JsonObject createUserObject(User user) {
+        JsonArrayBuilder questionsArray = Json.createArrayBuilder();
+        user.getQuestions().forEach((k, v) -> questionsArray.add(Json.createObjectBuilder()
+                .add("Question", k)
+                .add("Answer", v)));
+        JsonObject userObject = Json.createObjectBuilder()
+                .add("Name", user.getName())
+                .add("Password", user.getPassword())
+                .add("Block", user.getBlock())
+                .add("Questions", questionsArray).build();
+        return userObject;
+    }
+
+    public JsonArray createUserObjectArray(Map<String, User> userMap) {
+        JsonArrayBuilder userObjectArray = Json.createArrayBuilder();
+        userMap.forEach((k, v) -> userObjectArray.add(createUserObject(v)));
+        return userObjectArray.build();
+    }
+
+    public void writeData() throws FileNotFoundException {
+        JsonArray jsonArray = createUserObjectArray(userMap);
+
+        Map<String, Object> properties = new HashMap<>(1);
+        properties.put(JsonGenerator.PRETTY_PRINTING, true);
+        JsonWriterFactory writerFactory = Json.createWriterFactory(properties);
+        JsonWriter writer = writerFactory.createWriter(new FileOutputStream("usersData"));
+
+        //JsonWriter writer = Json.createWriter(new FileOutputStream("usersData"));
+        writer.writeArray(jsonArray);
+        writer.close();
+    }
+
+    public void readData() throws FileNotFoundException {
+        try (JsonReader reader = Json.createReader(new FileReader("usersData"))) {
+            JsonArray jsonArray = reader.readArray();
+            for (JsonValue jsonValue : jsonArray) {
+                User user = new User();
+                JsonObject jsonObject = (JsonObject) jsonValue;
+                user.setName(jsonObject.getString("Name"));
+                user.setPassword(jsonObject.getString("Password"));
+                user.setBlocked(jsonObject.getBoolean("Block"));
+                for (JsonValue jsonQuestion : jsonObject.getJsonArray("Questions")) {
+                    JsonObject jsonQuestionObject = (JsonObject) jsonQuestion;
+                    user.addQuestions(jsonQuestionObject.getString("Question"), jsonQuestionObject.getString("Answer"));
+                }
+                userMap.put(jsonObject.getString("Name"), user);
+            }
+        }
+    }
 
     public void readUsers() throws FileNotFoundException {
         try (Scanner scanner = new Scanner(new File("users"))) {

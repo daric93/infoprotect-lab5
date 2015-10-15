@@ -43,7 +43,7 @@ public class AskPasswordDialog extends JDialog {
         userPanel = new JPanel();
 
         //======== this ========
-        setModal(true);
+        setAutoRequestFocus(false);
         Container contentPane = getContentPane();
         contentPane.setLayout(new BorderLayout());
 
@@ -137,7 +137,7 @@ public class AskPasswordDialog extends JDialog {
                     new Insets(0, 0, 0, 0), 0, 0));
         }
         contentPane.add(dialogPane, BorderLayout.CENTER);
-        setSize(465, 200);
+        setSize(485, 225);
         setLocationRelativeTo(getOwner());
         // JFormDesigner - End of component initialization  //GEN-END:initComponents
 
@@ -147,37 +147,54 @@ public class AskPasswordDialog extends JDialog {
             User user = sys.getUserByName(userName);
             if (user != null) {
                 if (password.equals(user.getPassword())) {
-                    if (Objects.equals(user.getPassword(), "empty")) {
+                    if (Objects.equals(user.getPassword(), "")) {
                         //NewPassword
                         NewPassword newPassword = new NewPassword((Dialog) null, user, sys);
                         newPassword.setVisible(true);
-                        this.setVisible(false);
+                        //ToDo
+                        menu(contentPane, user);
+                        this.setVisible(true);
                     } else {
-                        if (Objects.equals(user.getName(), "admin")) {
-                            //AdminPanel
-                            userPanel.add(new AdminPanel(user, sys));
-                            cancelButton.setEnabled(false);
+                        if (user.isBlocked()) {
+                            messegeLabel.setText("User is blocked");
                             okButton.setEnabled(false);
-                            userNameTextField.setEnabled(false);
-                            passwordField1.setEnabled(false);
-                            dialogPane.repaint();
-                            contentPane.revalidate();
-                        } else {//UserPanel
-                            userPanel.add(new UserPanel(user));
-                            cancelButton.setEnabled(false);
-                            okButton.setEnabled(false);
-                            userNameTextField.setEnabled(false);
-                            passwordField1.setEnabled(false);
-                            dialogPane.repaint();
-                            contentPane.revalidate();
+                        } else {
+                            int index = (int) (Math.random() * (sys.getQuestions().size()));
+                            String answer = JOptionPane.showInputDialog(this, sys.getQuestions().get(index));
+                            if (user.checkQuestion(sys.getQuestions().get(index), answer)) {
+                                //Menu
+
+                                menu(contentPane, user);
+                            } else
+                                messegeLabel.setText("Wrong answer");
                         }
                     }
-                } else {
+                } else
                     messegeLabel.setText("Wrong password");
-                }
             } else messegeLabel.setText("No such user");
         });
         cancelButton.addActionListener((v) -> dispose());
+    }
+
+    private void menu(Container contentPane, User user) {
+        if (Objects.equals(user.getName(), "admin")) {
+            //AdminPanel
+            userPanel.add(new AdminPanel(user, sys));
+            cancelButton.setEnabled(false);
+            okButton.setEnabled(false);
+            userNameTextField.setEnabled(false);
+            passwordField1.setEnabled(false);
+            dialogPane.repaint();
+            contentPane.revalidate();
+        } else {//UserPanel
+            userPanel.add(new UserPanel(user, sys));
+            cancelButton.setEnabled(false);
+            okButton.setEnabled(false);
+            userNameTextField.setEnabled(false);
+            passwordField1.setEnabled(false);
+            dialogPane.repaint();
+            contentPane.revalidate();
+        }
     }
 
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables

@@ -6,6 +6,7 @@ package infoprotect.lab5;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.FileNotFoundException;
 
 /**
  * @author Darya Koreneva
@@ -77,6 +78,11 @@ public class AdminPanel extends JPanel {
         });
         exitButton.addActionListener((v) -> {
             //save
+            try {
+                sys.writeData();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
             SwingUtilities.getWindowAncestor(this).dispose();
         });
     }

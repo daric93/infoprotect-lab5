@@ -51,6 +51,7 @@ public class NewPassword extends JDialog {
         cancelButton = new JButton();
 
         //======== this ========
+        setModal(true);
         Container contentPane = getContentPane();
         contentPane.setLayout(new BorderLayout());
 

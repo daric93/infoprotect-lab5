@@ -6,15 +6,18 @@ package infoprotect.lab5;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.FileNotFoundException;
 
 /**
  * @author Darya Koreneva
  */
 public class UserPanel extends JPanel {
     User user;
+    Sys sys;
 
-    public UserPanel(User user) {
+    public UserPanel(User user,Sys sys) {
         this.user = user;
+        this.sys=sys;
         initComponents();
     }
 
@@ -64,7 +67,13 @@ public class UserPanel extends JPanel {
         });
         exitButton.addActionListener((v) -> {
             //Save
+            try {
+                sys.writeData();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
             SwingUtilities.getWindowAncestor(this).dispose();
+            System.exit(0);
         });
     }
 

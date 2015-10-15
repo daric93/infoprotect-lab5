@@ -10,7 +10,8 @@ import java.io.FileNotFoundException;
 public class GUI extends JFrame {
     public static void main(String[] args) throws FileNotFoundException {
         Sys sys = new Sys();
-        sys.readUsers();
+        //sys.readUsers();
+        sys.readData();
         sys.readQuestions();
 
         AskPasswordDialog askPasswordDialog = new AskPasswordDialog((Dialog) null, sys);
