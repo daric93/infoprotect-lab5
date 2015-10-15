@@ -53,4 +53,12 @@ public class User {
     boolean checkQuestion(String question, String answer) {
         return Objects.equals(questions.get(question), answer);
     }
+
+    public boolean getBlock() {
+        return blocked;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 }

@@ -9,7 +9,7 @@ import java.util.*;
  * Created by darya on 11.10.15.
  */
 public class Sys {
-    private final Map<String, User> userMap = new HashMap<>();
+    public final Map<String, User> userMap = new HashMap<>();
     private final List<String> questions = new ArrayList<>();
     private static Scanner sc = new Scanner(System.in);
 
@@ -155,5 +155,13 @@ public class Sys {
         do {
             sys.createUser();
         } while (!Objects.equals(sc.nextLine(), "q"));
+    }
+
+    public User getUserByName(String userName) {
+        return userMap.get(userName);
+    }
+
+    public List<String> getQuestions() {
+        return questions;
     }
 }
